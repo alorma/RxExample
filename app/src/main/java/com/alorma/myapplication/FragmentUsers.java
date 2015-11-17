@@ -1,9 +1,57 @@
 package com.alorma.myapplication;
 
-public class FragmentUsers extends BaseFragment<Integer> {
+import java.util.List;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
+
+public class FragmentUsers extends BaseFragment<User> {
 
   @Override
-  public void add(Integer integer) {
-    adapter.add(String.valueOf(integer));
+  public void addItem(User user) {
+    adapter.add(user.name);
+  }
+
+  @Override
+  public void search(Observable<String> obs) {
+    obs.flatMap(new Func1<String, Observable<UsersSearch>>() {
+      @Override
+      public Observable<UsersSearch> call(String s) {
+        return service.users(s);
+      }
+    })
+        .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.computation())
+        .map(new Func1<UsersSearch, List<User>>() {
+          @Override
+          public List<User> call(UsersSearch UsersSearch) {
+            return UsersSearch.items;
+          }
+        })
+        .flatMap(new Func1<List<User>, Observable<User>>() {
+          @Override
+          public Observable<User> call(List<User> Users) {
+            return Observable.from(Users);
+          }
+        })
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Subscriber<User>() {
+          @Override
+          public void onCompleted() {
+
+          }
+
+          @Override
+          public void onError(Throwable e) {
+
+          }
+
+          @Override
+          public void onNext(User user) {
+            addItem(user);
+          }
+        });
   }
 }
