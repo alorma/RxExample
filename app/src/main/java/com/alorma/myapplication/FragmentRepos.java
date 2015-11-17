@@ -2,7 +2,7 @@ package com.alorma.myapplication;
 
 import java.util.List;
 import rx.Observable;
-import rx.Subscriber;
+import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
@@ -23,7 +23,6 @@ public class FragmentRepos extends BaseFragment<Repo> {
       }
     })
         .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.computation())
         .map(new Func1<ReposSearch, List<Repo>>() {
           @Override
           public List<Repo> call(ReposSearch reposSearch) {
@@ -37,7 +36,7 @@ public class FragmentRepos extends BaseFragment<Repo> {
           }
         })
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Subscriber<Repo>() {
+        .subscribe(new Observer<Repo>() {
           @Override
           public void onCompleted() {
 
