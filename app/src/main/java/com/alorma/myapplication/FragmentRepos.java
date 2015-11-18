@@ -4,6 +4,7 @@ import java.util.List;
 import rx.Observable;
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -23,6 +24,13 @@ public class FragmentRepos extends BaseFragment<Repo> {
       }
     })
         .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .doOnNext(new Action1<ReposSearch>() {
+          @Override
+          public void call(ReposSearch reposSearch) {
+            adapter.clear();
+          }
+        })
         .map(new Func1<ReposSearch, List<Repo>>() {
           @Override
           public List<Repo> call(ReposSearch reposSearch) {
@@ -35,7 +43,6 @@ public class FragmentRepos extends BaseFragment<Repo> {
             return Observable.from(repos);
           }
         })
-        .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Observer<Repo>() {
           @Override
           public void onCompleted() {

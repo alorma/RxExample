@@ -4,6 +4,7 @@ import java.util.List;
 import rx.Observable;
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -11,7 +12,7 @@ public class FragmentUsers extends BaseFragment<User> {
 
   @Override
   public void addItem(User user) {
-    adapter.add(user.name);
+    adapter.add(user.login);
   }
 
   @Override
@@ -23,6 +24,14 @@ public class FragmentUsers extends BaseFragment<User> {
       }
     })
         .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .doOnNext(
+            new Action1<UsersSearch>() {
+          @Override
+          public void call(UsersSearch usersSearch) {
+            adapter.clear();
+          }
+        })
         .map(new Func1<UsersSearch, List<User>>() {
           @Override
           public List<User> call(UsersSearch UsersSearch) {
@@ -31,11 +40,10 @@ public class FragmentUsers extends BaseFragment<User> {
         })
         .flatMap(new Func1<List<User>, Observable<User>>() {
           @Override
-          public Observable<User> call(List<User> Users) {
-            return Observable.from(Users);
+          public Observable<User> call(List<User> users) {
+            return Observable.from(users);
           }
         })
-        .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Observer<User>() {
           @Override
           public void onCompleted() {
